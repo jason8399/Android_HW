@@ -15,6 +15,7 @@ public class Activity2 extends ActionBarActivity {
     private Button TextSizeInc;
     private Button TextSizeDec;
     private float TextSize;
+    private int TextColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +30,7 @@ public class Activity2 extends ActionBarActivity {
         Bundle bundle;
         bundle = this.getIntent().getExtras();
         string.setText(bundle.getString("KEY_TEXT"));
+        string.setTextColor(bundle.getInt("KEY_COLOR") + 0xFF000000);
         TextSize = string.getTextSize();
         Finish.setOnClickListener(new View.OnClickListener() {
             @Override
