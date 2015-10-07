@@ -5,7 +5,9 @@ import android.media.MediaPlayer;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends ActionBarActivity {
 
+    private static final String ACTIVITY_TAG="Main";
     Button playRawBtn, playSDBtn, playURLBtn, stopBtn, volUpBtn, volDownBtn;
     MediaPlayer player;
     ProgressBar progressBar;
@@ -25,10 +28,10 @@ public class MainActivity extends ActionBarActivity {
     File mediaDiPath;
     File[] mediaInDir;
     FilenameFilter mediaFileFilter;
-    String[] filter = {".mp3", ".ogg"};
+    String[] filter = {".mp3", ".ogg", ".wav"};
     ArrayList<String> fileList;
     ArrayAdapter<String> listAdapter;
-    int progressState = 0, length;
+    int progressState = 0, length, numTrack;
 
     private void init() {
         playRawBtn = (Button)findViewById(R.id.button);
@@ -175,6 +178,33 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 audioManager.adjustVolume(AudioManager.ADJUST_LOWER, 5);
+            }
+        });
+
+        fileListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if(player.isPlaying()){
+                    player.stop();
+                }
+                try {
+                    progressBar.setProgress(0);
+                    player = new MediaPlayer();
+                    Log.d(ACTIVITY_TAG, Environment.getExternalStorageDirectory() + "/Lab2_music/"
+                            + fileList.get(position).toString());
+                    player.setDataSource(Environment.getExternalStorageDirectory() + "/Lab2_music/"
+                            + fileList.get(position).toString());
+                    numTrack = position;
+                    player.prepare();
+                    length = player.getDuration();
+                    progressBar.setMax(length / 1000);
+                    player.start();
+                    new Thread(new ProcessBarRefresh()).start();
+                    playSDBtn.setEnabled(false);
+                    stopBtn.setEnabled(true);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
