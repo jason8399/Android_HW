@@ -22,7 +22,7 @@ public class MainActivity extends ActionBarActivity {
 
     private static final String ACTIVITY_TAG="Main";
     private static final String FILE_PATH = Environment.getExternalStorageDirectory() + "/Lab2_music/";
-    Button playRawBtn, playSDBtn, playURLBtn, stopBtn, volUpBtn, volDownBtn, pause;
+    Button playRawBtn, playSDBtn, playURLBtn, stopBtn, volUpBtn, volDownBtn, pause, nextBtn;
     MediaPlayer player;
     ProgressBar progressBar;
     ListView fileListView;
@@ -42,6 +42,7 @@ public class MainActivity extends ActionBarActivity {
         volUpBtn = (Button)findViewById(R.id.button5);
         volDownBtn = (Button)findViewById(R.id.button6);
         pause = (Button)findViewById(R.id.button7);
+        nextBtn = (Button)findViewById(R.id.button8);
         progressBar = (ProgressBar)findViewById(R.id.progressBar);
         fileListView = (ListView)findViewById(R.id.listView);
         player = new MediaPlayer();
@@ -110,7 +111,7 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(View v) {
                 try {
                     progressBar.setProgress(0);
-                    player = new MediaPlayer();
+                    player.reset();
                     player.setDataSource("/sdcard/test.mp3");
                     player.prepare();
                     length = player.getDuration();
@@ -138,7 +139,7 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(View v) {
                 try {
                     progressBar.setProgress(0);
-                    player = new MediaPlayer();
+                    player.reset();
                     player.setDataSource("http://www.vorbis.com/music/Epoq-Lepidoptera.ogg");
                     player.prepare();
                     length = player.getDuration();
@@ -234,7 +235,7 @@ public class MainActivity extends ActionBarActivity {
         player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                if(++nowPlaying == numTrack)
+                if (++nowPlaying == numTrack)
                     nowPlaying = 0;
                 try {
                     mp.reset();
@@ -247,6 +248,13 @@ public class MainActivity extends ActionBarActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+        });
+
+        nextBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                player.seekTo(player.getDuration());
             }
         });
 
