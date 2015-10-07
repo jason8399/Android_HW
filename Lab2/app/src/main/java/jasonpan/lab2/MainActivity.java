@@ -261,7 +261,19 @@ public class MainActivity extends ActionBarActivity {
         nextBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                player.seekTo(player.getDuration());
+                if (++nowPlaying == numTrack)
+                    nowPlaying = 0;
+                try {
+                    player.reset();
+                    player.setDataSource(FILE_PATH + fileList.get(nowPlaying));
+                    player.prepare();
+                    length = player.getDuration();
+                    progressBar.setMax(length / 1000);
+                    player.start();
+                    new Thread(new ProcessBarRefresh()).start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
