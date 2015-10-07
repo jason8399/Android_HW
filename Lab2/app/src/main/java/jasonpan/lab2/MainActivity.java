@@ -2,19 +2,32 @@ package jasonpan.lab2;
 
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class MainActivity extends ActionBarActivity {
 
     Button playRawBtn, playSDBtn, playURLBtn, stopBtn, volUpBtn, volDownBtn;
     MediaPlayer player;
     ProgressBar progressBar;
+    ListView fileListView;
+    File mediaDiPath;
+    File[] mediaInDir;
+    FilenameFilter mediaFileFilter;
+    String[] filter = {".mp3", ".ogg"};
+    ArrayList<String> fileList;
+    ArrayAdapter<String> listAdapter;
     int progressState = 0, length;
 
     private void init() {
@@ -25,7 +38,30 @@ public class MainActivity extends ActionBarActivity {
         volUpBtn = (Button)findViewById(R.id.button5);
         volDownBtn = (Button)findViewById(R.id.button6);
         progressBar = (ProgressBar)findViewById(R.id.progressBar);
+        fileListView = (ListView)findViewById(R.id.listView);
         player = new MediaPlayer();
+    }
+
+    private void setFileList(){
+        mediaFileFilter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String filename) {
+                for(String filterString: filter){
+                    if(filename.contains(filterString)) return true;
+                }
+                return false;
+            }
+        };
+        mediaDiPath = new File(Environment.getExternalStorageDirectory() + "/Lab2_music");
+        if(!mediaDiPath.exists()){
+            mediaDiPath.mkdir();
+        }
+        mediaInDir = mediaDiPath.listFiles(mediaFileFilter);
+        fileList = new ArrayList<>();
+        for(File file: mediaInDir){
+           fileList.add(file.getName());
+        }
+        listAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, fileList);
     }
 
     @Override
@@ -35,6 +71,8 @@ public class MainActivity extends ActionBarActivity {
 
         final AudioManager audioManager = (AudioManager) this.getSystemService(AUDIO_SERVICE);
         init();
+        setFileList();
+        fileListView.setAdapter(listAdapter);
 
         playRawBtn.setEnabled(true);
         playSDBtn.setEnabled(true);
