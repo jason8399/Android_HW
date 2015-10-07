@@ -87,6 +87,8 @@ public class MainActivity extends ActionBarActivity {
         playSDBtn.setEnabled(true);
         stopBtn.setEnabled(false);
         pause.setEnabled(false);
+        nextBtn.setEnabled(false);
+        forwardBtn.setEnabled(false);
 
         playRawBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -173,6 +175,8 @@ public class MainActivity extends ActionBarActivity {
                     stopBtn.setEnabled(false);
                     pause.setText("暫停");
                     pause.setEnabled(false);
+                    nextBtn.setEnabled(false);
+                    forwardBtn.setEnabled(false);
                 } catch (IllegalStateException e) {
                     e.printStackTrace();
                 }
@@ -213,6 +217,8 @@ public class MainActivity extends ActionBarActivity {
                     playSDBtn.setEnabled(false);
                     stopBtn.setEnabled(true);
                     pause.setEnabled(true);
+                    nextBtn.setEnabled(true);
+                    forwardBtn.setEnabled(true);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
