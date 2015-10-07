@@ -22,7 +22,7 @@ public class MainActivity extends ActionBarActivity {
 
     private static final String ACTIVITY_TAG="Main";
     private static final String FILE_PATH = Environment.getExternalStorageDirectory() + "/Lab2_music/";
-    Button playRawBtn, playSDBtn, playURLBtn, stopBtn, volUpBtn, volDownBtn, pause, nextBtn;
+    Button playRawBtn, playSDBtn, playURLBtn, stopBtn, volUpBtn, volDownBtn, pause, nextBtn, forwardBtn;
     MediaPlayer player;
     ProgressBar progressBar;
     ListView fileListView;
@@ -43,6 +43,7 @@ public class MainActivity extends ActionBarActivity {
         volDownBtn = (Button)findViewById(R.id.button6);
         pause = (Button)findViewById(R.id.button7);
         nextBtn = (Button)findViewById(R.id.button8);
+        forwardBtn = (Button)findViewById(R.id.button9);
         progressBar = (ProgressBar)findViewById(R.id.progressBar);
         fileListView = (ListView)findViewById(R.id.listView);
         player = new MediaPlayer();
@@ -258,6 +259,24 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        forwardBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (--nowPlaying < 0)
+                    nowPlaying = numTrack - 1;
+                try {
+                    player.reset();
+                    player.setDataSource(FILE_PATH + fileList.get(nowPlaying));
+                    player.prepare();
+                    length = player.getDuration();
+                    progressBar.setMax(length / 1000);
+                    player.start();
+                    new Thread(new ProcessBarRefresh()).start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     class ProcessBarRefresh implements Runnable {
