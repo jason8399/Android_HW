@@ -21,6 +21,7 @@ import java.util.ArrayList;
 public class MainActivity extends ActionBarActivity {
 
     private static final String ACTIVITY_TAG="Main";
+    private static final String FILE_PATH = Environment.getExternalStorageDirectory() + "/Lab2_music/";
     Button playRawBtn, playSDBtn, playURLBtn, stopBtn, volUpBtn, volDownBtn, pause;
     MediaPlayer player;
     ProgressBar progressBar;
@@ -31,7 +32,7 @@ public class MainActivity extends ActionBarActivity {
     String[] filter = {".mp3", ".ogg", ".wav"};
     ArrayList<String> fileList;
     ArrayAdapter<String> listAdapter;
-    int progressState = 0, length, numTrack;
+    int progressState = 0, length, numTrack, nowPlaying;
 
     private void init() {
         playRawBtn = (Button)findViewById(R.id.button);
@@ -56,7 +57,7 @@ public class MainActivity extends ActionBarActivity {
                 return false;
             }
         };
-        mediaDiPath = new File(Environment.getExternalStorageDirectory() + "/Lab2_music");
+        mediaDiPath = new File(FILE_PATH);
         if(!mediaDiPath.exists()){
             mediaDiPath.mkdir();
         }
@@ -65,6 +66,8 @@ public class MainActivity extends ActionBarActivity {
         for(File file: mediaInDir){
            fileList.add(file.getName());
         }
+        numTrack = fileList.size();
+        Log.d(ACTIVITY_TAG, numTrack+"");
         listAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, fileList);
     }
 
@@ -195,13 +198,11 @@ public class MainActivity extends ActionBarActivity {
                     player.stop();
                 }
                 try {
+                    player.reset();
                     progressBar.setProgress(0);
-                    player = new MediaPlayer();
-                    Log.d(ACTIVITY_TAG, Environment.getExternalStorageDirectory() + "/Lab2_music/"
-                            + fileList.get(position).toString());
-                    player.setDataSource(Environment.getExternalStorageDirectory() + "/Lab2_music/"
-                            + fileList.get(position).toString());
-                    numTrack = position;
+                    Log.d(ACTIVITY_TAG, FILE_PATH + fileList.get(position));
+                    player.setDataSource(FILE_PATH + fileList.get(position));
+                    nowPlaying = position;
                     player.prepare();
                     length = player.getDuration();
                     progressBar.setMax(length / 1000);
@@ -219,14 +220,32 @@ public class MainActivity extends ActionBarActivity {
         pause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(player.isPlaying()){
+                if (player.isPlaying()) {
                     player.pause();
                     pause.setText("繼續");
-                }
-                else {
+                } else {
                     pause.setText("暫停");
                     player.start();
                     new Thread(new ProcessBarRefresh()).start();
+                }
+            }
+        });
+
+        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                if(++nowPlaying == numTrack)
+                    nowPlaying = 0;
+                try {
+                    mp.reset();
+                    mp.setDataSource(FILE_PATH + fileList.get(nowPlaying));
+                    mp.prepare();
+                    length = mp.getDuration();
+                    progressBar.setMax(length / 1000);
+                    mp.start();
+                    new Thread(new ProcessBarRefresh()).start();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         });

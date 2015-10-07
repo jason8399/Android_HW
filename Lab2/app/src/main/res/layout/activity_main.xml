@@ -41,7 +41,8 @@
         android:layout_height="wrap_content"
         android:text="停止"
         android:id="@+id/button4"
-        android:layout_below="@+id/switch3"
+        android:layout_alignBaseline="@+id/button2"
+        android:layout_alignBottom="@+id/button2"
         android:layout_alignParentEnd="true" />
 
     <ProgressBar
@@ -95,12 +96,12 @@
         android:layout_alignEnd="@+id/listView"
         android:checked="false" />
 
-    <Switch
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Shuffle"
-        android:id="@+id/switch3"
-        android:layout_above="@+id/button2"
-        android:checked="false"
-        android:layout_alignEnd="@+id/button4" />
+        android:text="Next"
+        android:id="@+id/button8"
+        android:layout_alignBottom="@+id/button4"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>
