@@ -21,7 +21,7 @@ import java.util.ArrayList;
 public class MainActivity extends ActionBarActivity {
 
     private static final String ACTIVITY_TAG="Main";
-    Button playRawBtn, playSDBtn, playURLBtn, stopBtn, volUpBtn, volDownBtn;
+    Button playRawBtn, playSDBtn, playURLBtn, stopBtn, volUpBtn, volDownBtn, pause;
     MediaPlayer player;
     ProgressBar progressBar;
     ListView fileListView;
@@ -40,6 +40,7 @@ public class MainActivity extends ActionBarActivity {
         stopBtn = (Button)findViewById(R.id.button4);
         volUpBtn = (Button)findViewById(R.id.button5);
         volDownBtn = (Button)findViewById(R.id.button6);
+        pause = (Button)findViewById(R.id.button7);
         progressBar = (ProgressBar)findViewById(R.id.progressBar);
         fileListView = (ListView)findViewById(R.id.listView);
         player = new MediaPlayer();
@@ -80,6 +81,7 @@ public class MainActivity extends ActionBarActivity {
         playRawBtn.setEnabled(true);
         playSDBtn.setEnabled(true);
         stopBtn.setEnabled(false);
+        pause.setEnabled(false);
 
         playRawBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,6 +95,7 @@ public class MainActivity extends ActionBarActivity {
                     new Thread(new ProcessBarRefresh()).start();
                     playRawBtn.setEnabled(false);
                     stopBtn.setEnabled(true);
+                    pause.setEnabled(true);
                 } catch (IllegalStateException e) {
                     e.printStackTrace();
                 }
@@ -113,6 +116,7 @@ public class MainActivity extends ActionBarActivity {
                     new Thread(new ProcessBarRefresh()).start();
                     playSDBtn.setEnabled(false);
                     stopBtn.setEnabled(true);
+                    pause.setEnabled(true);
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (IllegalStateException e) {
@@ -140,6 +144,7 @@ public class MainActivity extends ActionBarActivity {
                     new Thread(new ProcessBarRefresh()).start();
                     playURLBtn.setEnabled(false);
                     stopBtn.setEnabled(true);
+                    pause.setEnabled(true);
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (IllegalStateException e) {
@@ -161,6 +166,8 @@ public class MainActivity extends ActionBarActivity {
                     playSDBtn.setEnabled(true);
                     playURLBtn.setEnabled(true);
                     stopBtn.setEnabled(false);
+                    pause.setText("暫停");
+                    pause.setEnabled(false);
                 } catch (IllegalStateException e) {
                     e.printStackTrace();
                 }
@@ -184,7 +191,7 @@ public class MainActivity extends ActionBarActivity {
         fileListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(player.isPlaying()){
+                if (player.isPlaying()) {
                     player.stop();
                 }
                 try {
@@ -202,11 +209,28 @@ public class MainActivity extends ActionBarActivity {
                     new Thread(new ProcessBarRefresh()).start();
                     playSDBtn.setEnabled(false);
                     stopBtn.setEnabled(true);
+                    pause.setEnabled(true);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         });
+
+        pause.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(player.isPlaying()){
+                    player.pause();
+                    pause.setText("繼續");
+                }
+                else {
+                    pause.setText("暫停");
+                    player.start();
+                    new Thread(new ProcessBarRefresh()).start();
+                }
+            }
+        });
+
     }
 
     class ProcessBarRefresh implements Runnable {
