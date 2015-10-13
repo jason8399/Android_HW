@@ -93,6 +93,7 @@ public class MainActivity extends ActionBarActivity {
         playRawBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                player.reset();
                 player = MediaPlayer.create(MainActivity.this, R.raw.sample);
                 try {
                     progressBar.setProgress(0);
@@ -124,6 +125,8 @@ public class MainActivity extends ActionBarActivity {
                     playSDBtn.setEnabled(false);
                     stopBtn.setEnabled(true);
                     pause.setEnabled(true);
+                    forwardBtn.setEnabled(true);
+                    nextBtn.setEnabled(true);
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (IllegalStateException e) {
