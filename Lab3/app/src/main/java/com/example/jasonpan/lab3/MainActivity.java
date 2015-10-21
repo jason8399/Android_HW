@@ -2,12 +2,15 @@ package com.example.jasonpan.lab3;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.MediaController;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
@@ -18,6 +21,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     int REQUEST_CODE = 1;
     String TAG = "MainActivity";
     Intent FileSelect;
+    TextView videoName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +29,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         setContentView(R.layout.activity_main);
 
         videoView = (VideoView)findViewById(R.id.videoView);
+        videoName = (TextView)findViewById(R.id.textView);
         mediaController = new MediaController(this);
         videoView.setMediaController(mediaController);
         videoView.setOnPreparedListener(this);
@@ -46,6 +51,11 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             return;
         }
         Uri uri = data.getData();
+        Cursor returnCursor =
+                getContentResolver().query(uri, null, null, null, null);
+        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+        returnCursor.moveToFirst();
+        videoName.setText(returnCursor.getString(nameIndex));
         videoView.setVideoURI(uri);
     }
 
