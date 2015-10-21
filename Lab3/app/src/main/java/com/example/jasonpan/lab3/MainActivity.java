@@ -37,6 +37,14 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         FileSelect = new Intent(Intent.ACTION_GET_CONTENT);
         FileSelect.setType("video/*");
         this.startActivityForResult(FileSelect, REQUEST_CODE);
+        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                FileSelect = new Intent(Intent.ACTION_GET_CONTENT);
+                FileSelect.setType("video/*");
+                startActivityForResult(FileSelect, REQUEST_CODE);
+            }
+        });
     }
 
     @Override
