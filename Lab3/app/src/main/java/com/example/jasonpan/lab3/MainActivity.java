@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.MediaController;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 public class MainActivity extends Activity implements MediaPlayer.OnPreparedListener {
@@ -62,10 +63,14 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             case KeyEvent.KEYCODE_VOLUME_DOWN:
                 break;
             case KeyEvent.KEYCODE_BACK:
-                videoView.suspend();
-                FileSelect = new Intent(Intent.ACTION_GET_CONTENT);
-                FileSelect.setType("video/*");
-                this.startActivityForResult(FileSelect, REQUEST_CODE);
+                if(videoView.isPlaying()) {
+                    videoView.suspend();
+                    FileSelect = new Intent(Intent.ACTION_GET_CONTENT);
+                    FileSelect.setType("video/*");
+                    this.startActivityForResult(FileSelect, REQUEST_CODE);
+                    Toast.makeText(this,
+                            "Pause and Press Back 2 times to exit", Toast.LENGTH_SHORT).show();
+                }
                 break;
             case KeyEvent.KEYCODE_MENU:
                 break;
