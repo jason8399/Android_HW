@@ -81,7 +81,7 @@ public class Mp4Activity extends Activity implements MediaPlayer.OnPreparedListe
             case KeyEvent.KEYCODE_VOLUME_DOWN:
                 break;
             case KeyEvent.KEYCODE_BACK:
-                if(videoView.isPlaying()) {
+                if (videoView.isPlaying()) {
                     videoView.suspend();
                     FileSelect = new Intent(Intent.ACTION_GET_CONTENT);
                     FileSelect.setType("video/*");

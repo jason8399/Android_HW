@@ -6,6 +6,7 @@ import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -300,6 +301,27 @@ public class Mp3Activity extends ActionBarActivity {
         });
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_VOLUME_UP:
+                break;
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                break;
+            case KeyEvent.KEYCODE_BACK:
+                if(player.isPlaying()){
+                    player.stop();
+                    player.release();
+                }
+                break;
+            case KeyEvent.KEYCODE_MENU:
+                break;
+            case KeyEvent.KEYCODE_HOME:
+                break;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
     class ProcessBarRefresh implements Runnable {
         @Override
         public void run() {
@@ -309,5 +331,4 @@ public class Mp3Activity extends ActionBarActivity {
             }
         }
     }
-
 }
