@@ -1,171 +1,189 @@
 ﻿<!DOCTYPE html>
 <html>
-  <head>
-    <title>Simple Map</title>
+<head>
+    <title>Place Autocomplete</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <style>
-      html, body, #map-canvas {
+        html, body {
         height: 100%;
-        margin: 0px;
-        padding: 0px
-      }
-      #goCenterUI, #setCenterUI {
+        margin: 0;
+        padding: 0;
+        }
+        #map {
+        height: 100%;
+        }
+        .controls {
+        margin-top: 10px;
+        border: 1px solid transparent;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        height: 32px;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        #origin-input,
+        #destination-input {
         background-color: #fff;
-        border: 2px solid #fff;
-        border-radius: 3px;
-        box-shadow: 0 2px 6px rgba(0,0,0,.3);
-        cursor: pointer;
-        float: left;
-        margin-bottom: 22px;
-        text-align: center;
-      }
-
-      #goCenterText, #setCenterText {
-        color: rgb(25,25,25);
-        font-family: Roboto,Arial,sans-serif;
+        font-family: Roboto;
         font-size: 15px;
-        line-height: 25px;
-        padding-left: 5px;
-        padding-right: 5px;
-      }
-
-      #setCenterUI {
+        font-weight: 300;
         margin-left: 12px;
-      }
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 200px;
+        }
+
+        #origin-input:focus,
+        #destination-input:focus {
+        border-color: #4d90fe;
+        }
+
+        #mode-selector {
+        color: #fff;
+        background-color: #4d90fe;
+        margin-left: 12px;
+        padding: 5px 11px 0px 11px;
+        }
+
+        #mode-selector label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+        }
+
+
     </style>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
-    <script>
-var map;
-var marker;
-/**
- * The CenterControl adds a control to the map that recenters the map on
- * Chicago.
- * @constructor
- * @param {!Element} controlDiv
- * @param {!google.maps.Map} map
- * @param {?google.maps.LatLng} center
- */
-function CenterControl(controlDiv, map, center) {
-  // We set up a variable for this since we're adding event listeners later.
-  var control = this;
+</head>
+<body>
+<input id="origin-input" class="controls" type="text"
+       placeholder="Enter an origin location">
 
-  // Set the center property upon construction
-  control.center_ = center;
-  controlDiv.style.clear = 'both';
+<input id="destination-input" class="controls" type="text"
+       placeholder="Enter a destination location">
 
-  // Set CSS for the control border
-  var goCenterUI = document.createElement('div');
-  goCenterUI.id = 'goCenterUI';
-  goCenterUI.title = 'Click to recenter the map';
-  controlDiv.appendChild(goCenterUI);
+<div id="mode-selector" class="controls">
+    <input type="radio" name="type" id="changemode-walking" checked="checked">
+    <label for="changemode-walking">Walking</label>
 
-  // Set CSS for the control interior
-  var goCenterText = document.createElement('div');
-  goCenterText.id = 'goCenterText';
-  goCenterText.innerHTML = 'Center Map';
-  goCenterUI.appendChild(goCenterText);
+    <input type="radio" name="type" id="changemode-transit">
+    <label for="changemode-transit">Transit</label>
 
-  // Set CSS for the setCenter control border
-  var setCenterUI = document.createElement('div');
-  setCenterUI.id = 'setCenterUI';
-  setCenterUI.title = 'Click to change the center of the map';
-  controlDiv.appendChild(setCenterUI);
+    <input type="radio" name="type" id="changemode-driving">
+    <label for="changemode-driving">Driving</label>
+</div>
 
-  // Set CSS for the control interior
-  var setCenterText = document.createElement('div');
-  setCenterText.id = 'setCenterText';
-  setCenterText.innerHTML = 'Set Center';
-  setCenterUI.appendChild(setCenterText);
+<div id="map"></div>
 
-  // Set up the click event listener for 'Center Map': Set the center of the map
-  // to the current center of the control.
-  goCenterUI.addEventListener('click', function() {
-    var currentCenter = control.getCenter();
-    map.setCenter(currentCenter);
+<script>
+function initMap() {
+  var origin_place_id = null;
+  var destination_place_id = null;
+  var travel_mode = google.maps.TravelMode.WALKING;
+  var map = new google.maps.Map(document.getElementById('map'), {
+    center: new google.maps.LatLng(24.969005, 121.541694),
+    zoom: 17,
+    scaleControl: true
+  });
+  var directionsService = new google.maps.DirectionsService;
+  var directionsDisplay = new google.maps.DirectionsRenderer;
+  directionsDisplay.setMap(map);
+  directionsDisplay.setOptions({
+    markerOptions: {
+      animation: google.maps.Animation.BOUNCE
+    }
   });
 
-  // Set up the click event listener for 'Set Center': Set the center of the
-  // control to the current center of the map.
-  setCenterUI.addEventListener('click', function() {
-    var newCenter = map.getCenter();
-    control.setCenter(newCenter);
+  var origin_input = document.getElementById('origin-input');
+  var destination_input = document.getElementById('destination-input');
+  var modes = document.getElementById('mode-selector');
+
+  map.controls[google.maps.ControlPosition.LEFT_TOP].push(origin_input);
+  map.controls[google.maps.ControlPosition.LEFT_TOP].push(destination_input);
+  map.controls[google.maps.ControlPosition.LEFT_TOP].push(modes);
+
+  var origin_autocomplete = new google.maps.places.Autocomplete(origin_input);
+  origin_autocomplete.bindTo('bounds', map);
+  var destination_autocomplete =
+    new google.maps.places.Autocomplete(destination_input);
+  destination_autocomplete.bindTo('bounds', map);
+
+  // Sets a listener on a radio button to change the filter type on Places
+  // Autocomplete.
+  function setupClickListener(id, mode) {
+    var radioButton = document.getElementById(id);
+    radioButton.addEventListener('click', function() {
+      travel_mode = mode;
+      route(origin_place_id, destination_place_id, travel_mode,
+          directionsService, directionsDisplay);
+    });
+  }
+  setupClickListener('changemode-walking', google.maps.TravelMode.WALKING);
+  setupClickListener('changemode-transit', google.maps.TravelMode.TRANSIT);
+  setupClickListener('changemode-driving', google.maps.TravelMode.DRIVING);
+
+  function expandViewportToFitPlace(map, place) {
+    if (place.geometry.viewport) {
+      map.fitBounds(place.geometry.viewport);
+    } else {
+      map.setCenter(place.geometry.location);
+      map.setZoom(17);
+    }
+  }
+
+  origin_autocomplete.addListener('place_changed', function() {
+    var place = origin_autocomplete.getPlace();
+    if (!place.geometry) {
+      window.alert("Autocomplete's returned place contains no geometry");
+      return;
+    }
+    expandViewportToFitPlace(map, place);
+
+    // If the place has a geometry, store its place ID and route if we have
+    // the other place ID
+    origin_place_id = place.place_id;
+    route(origin_place_id, destination_place_id, travel_mode,
+        directionsService, directionsDisplay);
   });
-}
 
-/**
- * Define a property to hold the center state.
- * @private
- */
-CenterControl.prototype.center_ = null;
+  destination_autocomplete.addListener('place_changed', function() {
+    var place = destination_autocomplete.getPlace();
+    if (!place.geometry) {
+      window.alert("Autocomplete's returned place contains no geometry");
+      return;
+    }
+    expandViewportToFitPlace(map, place);
 
-/**
- * Gets the map center.
- * @return {?google.maps.LatLng}
- */
-CenterControl.prototype.getCenter = function() {
-  return this.center_;
-};
+    // If the place has a geometry, store its place ID and route if we have
+    // the other place ID
+    destination_place_id = place.place_id;
+    route(origin_place_id, destination_place_id, travel_mode,
+        directionsService, directionsDisplay);
+  });
 
-/**
- * Sets the map center.
- * @param {?google.maps.LatLng} center
- */
-CenterControl.prototype.setCenter = function(center) {
-  this.center_ = center;
-};
-
-function toggleBounce() {
-  if (marker.getAnimation() !== null) {
-    marker.setAnimation(null);
-  } else {
-    marker.setAnimation(google.maps.Animation.BOUNCE);
+  function route(origin_place_id, destination_place_id, travel_mode,
+      directionsService, directionsDisplay) {
+    if (!origin_place_id || !destination_place_id) {
+      return;
+    }
+    directionsService.route({
+      origin: {'placeId': origin_place_id},
+      destination: {'placeId': destination_place_id},
+      travelMode: travel_mode
+    }, function(response, status) {
+      if (status === google.maps.DirectionsStatus.OK) {
+        directionsDisplay.setDirections(response);
+      } else {
+        window.alert('Directions request failed due to ' + status);
+      }
+    });
   }
 }
 
-function initialize() {
-  var myLatLng = new google.maps.LatLng(24.969005, 121.541694);
-  var mapOptions = {
-    zoom: 17,
-    center: myLatLng
-  };
-  map = new google.maps.Map(document.getElementById('map-canvas'),
-      mapOptions);
-
-  var contentString = '<div><h1>Home</h1></div>';
-
-  var infowindow = new google.maps.InfoWindow({
-    content: contentString
-  });
-
-  marker = new google.maps.Marker({
-    map: map,
-    position: myLatLng,
-    animation: google.maps.Animation.DROP,
-    title: 'Home'
-  });
-
-  marker.addListener('click', function() {
-    infowindow.open(map, marker);
-    toggleBounce();
-  });
-
-
-  // Create the DIV to hold the control and call the CenterControl() constructor
-  // passing in this DIV.
-  var centerControlDiv = document.createElement('div');
-  var centerControl = new CenterControl(centerControlDiv, map, myLatLng);
-
-  centerControlDiv.index = 1;
-  centerControlDiv.style['padding-top'] = '10px';
-  map.controls[google.maps.ControlPosition.TOP_CENTER].push(centerControlDiv);
-}
-
-google.maps.event.addDomListener(window, 'load', initialize);
-
     </script>
-  </head>
-  <body>
-    <div id="map-canvas"></div>
-  </body>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&callback=initMap"
+        async defer></script>
+</body>
 </html>
