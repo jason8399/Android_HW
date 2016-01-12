@@ -108,6 +108,16 @@ public class DB {
     public boolean delete(long rowId) {
         return db.delete(DATABASE_TABLE, KEY_ROWID + "=" + rowId, null) > 0;
     }
+
+    public void deleteFirst() {
+        Cursor cursor = db.query(DATABASE_TABLE, null, null, null, null, null, null);
+
+        if(cursor.moveToFirst()) {
+            String rowId = cursor.getString(cursor.getColumnIndex(KEY_ROWID));
+
+            db.delete(DATABASE_TABLE, KEY_ROWID + "=?",  new String[]{rowId});
+        }
+    }
     
     //query single entry
     public Cursor get(long rowId) throws SQLException {

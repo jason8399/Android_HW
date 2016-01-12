@@ -56,7 +56,8 @@ public class IntentTest2 extends ListActivity {
         deletetbtn.setOnClickListener( new OnClickListener() {
 
             public void onClick(View v) {
-                mDbHelper.delete(Integer.valueOf(edit.getText().toString()));
+                mDbHelper.deleteFirst();
+                //mDbHelper.delete(Integer.valueOf(edit.getText().toString()));
                 edit.setText("");
                 fillData();
             }
