@@ -92,12 +92,12 @@ public class IntentTest2 extends ListActivity {
     private int mNoteNumber = 1;
     protected static final int MENU_INSERT = Menu.FIRST;
     protected static final int MENU_DELETE = Menu.FIRST+1;
-
-    @Override
+    protected static final int MENU_DELETE_ALL = Menu.FIRST+2;
     public boolean onCreateOptionsMenu(Menu menu) {
         // TODO Auto-generated method stub
         menu.add(0, MENU_INSERT, 0, "新增");
         menu.add(0, MENU_DELETE, 0, "刪除");
+        menu.add(0, MENU_DELETE_ALL, 0, "全部刪除");
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -111,6 +111,9 @@ public class IntentTest2 extends ListActivity {
                 fillData();
             case MENU_DELETE:
                 mDbHelper.delete(getListView().getSelectedItemId());
+                fillData();
+            case MENU_DELETE_ALL:
+                mDbHelper.deleteAll();
                 fillData();
         }
 

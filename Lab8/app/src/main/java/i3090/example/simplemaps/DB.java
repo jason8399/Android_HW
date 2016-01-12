@@ -118,6 +118,10 @@ public class DB {
             db.delete(DATABASE_TABLE, KEY_ROWID + "=?",  new String[]{rowId});
         }
     }
+
+    public void deleteAll() {
+        db.delete(DATABASE_TABLE, null, null);
+    }
     
     //query single entry
     public Cursor get(long rowId) throws SQLException {
